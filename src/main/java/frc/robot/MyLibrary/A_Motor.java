@@ -1,17 +1,17 @@
-package frc.robot.commands;
+package frc.robot.MyLibrary;
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.OpenLoopRampsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-public class Motorstuff extends TalonFX {
-    public Motorstuff (int id, String canBus) {
+public class A_Motor extends TalonFX {
+    public A_Motor (int id, String canBus) {
         super(id, canBus);
         init();
     }
 
-    public Motorstuff (int id) {
+    public A_Motor (int id) {
         super(id, "rio");
         init();
     }
@@ -42,5 +42,11 @@ public class Motorstuff extends TalonFX {
         super.getConfigurator().setPosition(pos / 360.0);
     }
 
-    
+    public double getRPM() {
+        return (super.getVelocity().getValueAsDouble() * 60.0);
+    }
+
+    public double getPosDeg() {
+        return super.getRotorPosition().getValueAsDouble() * 360.0;
+    }
 }

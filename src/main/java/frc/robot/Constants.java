@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -17,9 +20,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.ExponentialProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -30,57 +34,12 @@ import edu.wpi.first.math.util.Units;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-// public final class Constants {
-//   public static class OperatorConstants {
-//     public static final int kDriverControllerPort = 0;
-//   }
-
-//   public static final class ids {
-//     public static final int FR_SPEED = 1;
-//     public static final int FR_ANGLE = 2;
-//     public static final int FR_ENCODER = 11;
-
-//     public static final int FL_SPEED = 3;
-//     public static final int FL_ANGLE = 4;
-//     public static final int FL_ENCODER = 12;
-
-//     public static final int BL_SPEED = 5;
-//     public static final int BL_ANGLE = 6;
-//     public static final int BL_ENCODER = 13;
-
-//     public static final int BR_SPEED = 7;
-//     public static final int BR_ANGLE = 8;
-//     public static final int BR_ENCODER = 14;
-
-//     public static final int PIGEON = 15;
-//   }
-
-//   public static final class robot {
-//     public static final double FALCON_ENCODER_TICKS = 2048.0;
-//   }
-
-//   public static class drivetrain {
-//     public static final double DRIVE_GEARING = 4.75;
-//     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
-//     public static final double DRIVE_TICKS_PER_ROTATION = robot.FALCON_ENCODER_TICKS * DRIVE_GEARING;
-//     public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
-//     public static final double DRIVE_TICKS_PER_METER = DRIVE_GEARING / WHEEL_CIRCUMFERENCE;
-    
-//     public static final PIDController ANGLE_PID = new PIDController(0.008 * 12.0, 0.0, 0.0);
-//     public static final SimpleMotorFeedforward ANGLE_FF = new SimpleMotorFeedforward(0.0, 1);
-
-//     public static final PIDController SPEED_PID = new PIDController(0.1, 0.0, 0.0);
-//     public static final SimpleMotorFeedforward SPEED_FF = new SimpleMotorFeedforward(0, 0);
-
-//     public static final PIDController ROT_PID = new PIDController(0.15, 0.0, 0.006);
-
-//     public static final PIDController CORRECTION_PID = new PIDController(0.1, 0.0, 0.006);
-//   }
-
-  
-// }
 
 public final class Constants {
+  public static class OperatorConstants {
+    public static final int kDriverControllerPort = 0;
+  }
+  
   public static class controller {
     public static final int PILOT_PORT = 0;
     public static final int COPILOT_PORT = 1;
@@ -243,9 +202,9 @@ public final class Constants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
     public static final double DRIVE_TICKS_PER_ROTATION =
         robot.FALCON_ENCODER_TICKS * DRIVE_GEARING;
-    public static final double WHEEL_CIRCUMFRENCE = Math.PI * WHEEL_DIAMETER;
+    public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
     public static final double DRIVE_TICKS_PER_METER =
-        DRIVE_GEARING / WHEEL_CIRCUMFRENCE;
+        DRIVE_GEARING / WHEEL_CIRCUMFERENCE;
     public static final double DRIVE_METERS_PER_TICK = 1 / DRIVE_TICKS_PER_METER;
 
     public static final double ANGLE_GEARING = 11.3142; // 11.3142 : 1
@@ -274,6 +233,13 @@ public final class Constants {
         new Translation2d(-(Constants.robot.A_LENGTH / 2), (Constants.robot.A_WIDTH / 2));
     public static final Translation2d BR_LOCATION =
         new Translation2d(-(Constants.robot.A_LENGTH / 2), -(Constants.robot.A_WIDTH / 2));
+
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+       FL_LOCATION, 
+       FR_LOCATION,
+       BL_LOCATION,
+       BR_LOCATION
+    );
 
     public static final double FL_ZERO = 148.623046875;
     public static final double BL_ZERO = 115.751953125;
@@ -386,4 +352,16 @@ public final class Constants {
     public static final Pose3d BACK_LIMELIGHT_LOCATION = new Pose3d(Units.inchesToMeters(-17.0), 0.0, Units.inchesToMeters(6.5), new Rotation3d(0, 0, Math.PI));
   }
   }
+
+  public static class driveTunerConstants {
+    public static final Slot0Configs steerGAINS = new Slot0Configs().withKP(100).withKI(0).withKD(0.2).withKS(0).withKV(0).withKA(0);
+
+    public static final Slot0Configs driveGAINS = new Slot0Configs().withKP(3).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+
+    public static final ClosedLoopOutputType angleClosedLoopOutput = ClosedLoopOutputType.Voltage;
+    public static final ClosedLoopOutputType speedClosedLoopOutput = ClosedLoopOutputType.Voltage;
+  
+    public static final double kSpeedAt12VoltsMps = 6.37;
+  }
+  // TODO delete driveTunerConstants if necessary 
 }
